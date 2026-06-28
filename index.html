@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#14141f">
+<title>Kavi Picture NFT</title>
+<style>
+  html{ -webkit-text-size-adjust:100%; text-size-adjust:100%; }
+  :root{
+    --ink:#14141f;
+    --surface:#1d1d2e;
+    --surface-2:#262638;
+    --surface-3:#2e2e44;
+    --parchment:#f3ead9;
+    --muted:#9c97ad;
+    --like:#e8927c;
+    --like-soft:#3a2a28;
+    --kavi:#4fb6a8;
+    --kavi-soft:#1f3a36;
+    --brass:#d4af6a;
+    --brass-soft:#3a3322;
+    --danger:#e0615a;
+    --danger-soft:#3a2326;
+    --success:#7fc99a;
+    --success-soft:#22372b;
+    --border:#34344a;
+    --radius:16px;
+    --serif: "Iowan Old Style","Palatino Linotype",Georgia,"Times New Roman",serif;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono: ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; overflow-x:hidden; }
+  body{
+    background: radial-gradient(circle at 20% 0%, #1c1c33 0%, var(--ink) 55%);
+    color: var(--parchment);
+    font-family: var(--sans);
+    line-height:1.5;
+    min-height:100vh;
+  }
+  a{ color:var(--brass); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+  button{ font-family:inherit; }
+  .app{ max-width:1100px; margin:0 auto; padding:20px 18px 80px; }
+  @media (max-width:420px){ .app{ padding:16px 14px 70px; } }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; flex-wrap:wrap; padding:10px 0 22px;
+    border-bottom:1px solid var(--border); margin-bottom:24px;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; }
+  .brand .quill{ font-size:1.5rem; }
+  .brand h1{
+    font-family:var(--serif); font-weight:600; font-size:1.35rem;
+    letter-spacing:.02em; margin:0; color:var(--parchment);
+  }
+  .brand small{ display:block; color:var(--muted); font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; }
+  .top-right{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  @media (max-width:600px){
+    .topbar{ flex-direction:column; align-items:stretch; }
+    .top-right{ width:100%; justify-content:flex-start; }
+    .top-right #connectBtn{ flex:1 1 100%; order:3; margin-top:4px; }
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--surface-2); border:1px solid var(--border);
+    color:var(--muted); font-size:.75rem; padding:6px 10px; border-radius:999px;
+    font-family:var(--mono);
+  }
+  .chip button.copy-icon{
+    background:none; border:none; color:var(--muted); cursor:pointer; padding:4px; font-size:.85rem;
+    min-width:26px; min-height:26px; display:inline-flex; align-items:center; justify-content:center;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  }
+  .chip button.copy-icon:hover{ color:var(--brass); }
+
+  /* ---------- buttons ---------- */
+  .btn{
+    padding:10px 16px; border-radius:10px; font-weight:600; font-size:.85rem;
+    cursor:pointer; border:1px solid transparent; transition:transform .15s ease,opacity .15s ease,box-shadow .15s ease;
+    min-height:40px; touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  }
+  .btn:hover{ transform:translateY(-1px); }
+  .btn:active{ transform:translateY(0); }
+  .btn-primary{ background:var(--brass); color:#231a06; font-size:.92rem; padding:11px 22px; }
+  .btn-like{ background:var(--like); color:#241511; }
+  .btn-kavi{ background:var(--kavi); color:#0d211d; }
+  .btn-brass{ background:var(--brass); color:#231a06; }
+  .btn-ghost{ background:transparent; border-color:var(--border); color:var(--parchment); }
+  .btn-danger{ background:var(--danger); color:#2a0c0a; }
+  .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+  body.busy .action-btn, body.wallet-disconnected .action-btn{ opacity:.45; pointer-events:none; }
+
+  /* ---------- layout sections ---------- */
+  section{ margin-bottom:34px; }
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+    margin-bottom:14px; flex-wrap:wrap;
+  }
+  .section-head h2{ font-family:var(--serif); font-size:1.15rem; margin:0; letter-spacing:.01em; }
+  .section-head .eyebrow{
+    display:block; font-size:.7rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--muted); margin-bottom:2px;
+  }
+  .hint{ color:var(--muted); font-size:.82rem; margin:4px 0 0; }
+
+  .banner{
+    border-radius:12px; padding:12px 16px; font-size:.88rem; margin-bottom:18px;
+    border:1px solid var(--danger); background:var(--danger-soft); color:#ffd9d6;
+  }
+  .hidden{ display:none !important; }
+
+  /* ---------- ledger (tokens) ---------- */
+  .ledger-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:680px){ .ledger-grid{ grid-template-columns:1fr; } }
+  .ledger-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:18px;
+  }
+  .ledger-card.like{ border-top:3px solid var(--like); }
+  .ledger-card.kavi{ border-top:3px solid var(--kavi); }
+  .ledger-card h3{ margin:0 0 2px; font-family:var(--serif); font-size:1.05rem; }
+  .ledger-card .token-addr{ font-family:var(--mono); font-size:.72rem; color:var(--muted); margin-bottom:14px; display:flex; gap:6px; align-items:center; }
+  .ledger-stats{ display:flex; gap:18px; margin-bottom:14px; }
+  .ledger-stats div{ flex:1; }
+  .ledger-stats .label{ font-size:.7rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted); }
+  .ledger-stats .value{ font-family:var(--mono); font-size:1.05rem; margin-top:2px; word-break:break-all; }
+  .approve-row{ display:flex; gap:8px; }
+  .approve-row input{ flex:1; min-width:0; }
+  @media (max-width:360px){
+    .approve-row{ flex-direction:column; }
+  }
+  .quick-amounts{ display:flex; gap:6px; margin-top:8px; }
+  .chip-btn{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--muted);
+    font-size:.75rem; padding:6px 11px; border-radius:999px; cursor:pointer;
+    min-height:30px; touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+  }
+  .chip-btn:hover{ color:var(--parchment); border-color:var(--brass); }
+
+  input[type="text"], input[type="number"]{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--parchment);
+    border-radius:9px; padding:10px 11px; font-size:1rem; font-family:var(--mono);
+    outline:none; min-height:40px; width:100%;
+  }
+  input[type="text"]:focus, input[type="number"]:focus, select:focus, .btn:focus-visible, button:focus-visible{
+    outline:2px solid var(--brass); outline-offset:1px;
+  }
+  select{
+    background:var(--surface-2); border:1px solid var(--border); color:var(--parchment);
+    border-radius:9px; padding:9px 30px 9px 9px; font-size:1rem; font-family:var(--sans); min-height:40px;
+    cursor:pointer; width:100%;
+  }
+  select option{ background:var(--surface-2); color:var(--parchment); }
+  .select-wrap{ position:relative; display:block; width:100%; }
+  .select-wrap .select-arrow{
+    position:absolute; right:11px; top:50%; transform:translateY(-50%);
+    color:var(--brass); font-size:.7rem; pointer-events:none;
+  }
+
+  /* ---------- mint panel ---------- */
+  .mint-card{
+    background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px; display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end;
+  }
+  .mint-card .mint-name{ flex:1; min-width:220px; }
+  .mint-card .mint-name label{ display:block; font-size:.78rem; color:var(--muted); margin-bottom:6px; }
+  .mint-card .mint-name input{ width:100%; font-family:var(--serif); font-size:1rem; }
+  .mint-cost{ font-size:.82rem; color:var(--muted); }
+  .mint-cost b{ color:var(--parchment); font-family:var(--mono); }
+  @media (max-width:560px){
+    .mint-card{ flex-direction:column; align-items:stretch; padding:18px; }
+    .mint-card .mint-name{ min-width:0; }
+    #mintBtn{ width:100%; }
+  }
+
+  /* ---------- gallery ---------- */
+  .gallery-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:18px;
+  }
+  .nft-card{
+    position:relative; background:var(--surface); border-radius:var(--radius);
+    border:1px solid var(--border); overflow:hidden; display:flex; flex-direction:column;
+  }
+  .nft-card.skeleton{ min-height:340px; background:linear-gradient(100deg,var(--surface) 30%,var(--surface-3) 50%,var(--surface) 70%); background-size:200% 100%; animation:shine 1.4s linear infinite; }
+  @keyframes shine{ 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+  .nft-card.flash{ box-shadow:0 0 0 2px var(--brass); }
+  .nft-image{ width:100%; aspect-ratio:1/1; background:#0e0e18; }
+  .nft-image img{ width:100%; height:100%; display:block; object-fit:cover; }
+  .nft-body{ padding:14px 16px 6px; flex:1; }
+  .nft-title{ font-family:var(--serif); font-size:1.02rem; margin:0 0 8px; display:flex; flex-wrap:wrap; justify-content:space-between; gap:6px; }
+  .nft-title span:first-child{ overflow-wrap:anywhere; }
+  .nft-title .nft-id{ font-family:var(--mono); font-size:.7rem; color:var(--muted); font-weight:400; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  .chip-row .chip{ font-family:var(--sans); }
+  .power-row{ display:flex; gap:14px; font-size:.82rem; color:var(--muted); margin-bottom:10px; }
+  .owner-line{ font-family:var(--mono); font-size:.72rem; color:var(--muted); margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+
+  .update-drawer{ border-top:1px solid var(--border); margin-top:4px; }
+  .update-drawer .drawer-toggle{
+    cursor:pointer; padding:12px 0; font-size:.82rem; color:var(--brass); font-weight:600;
+    background:none; border:none; width:100%; text-align:left; display:block;
+    touch-action:manipulation; -webkit-tap-highlight-color:transparent; font-family:inherit;
+  }
+  .update-drawer .drawer-toggle::before{ content:"▸ "; }
+  .update-drawer.open .drawer-toggle::before{ content:"▾ "; }
+  .update-drawer .update-grid{ display:none; }
+  .update-drawer.open .update-grid{ display:flex; }
+  .update-grid{ padding-bottom:14px; flex-direction:column; gap:10px; }
+  .field-row{ display:grid; grid-template-columns:74px 1fr auto; gap:8px; align-items:center; }
+  .field-row label{ font-size:.74rem; color:var(--muted); }
+  .field-row .select-wrap{ width:100%; }
+  .field-row .btn{ font-size:.72rem; padding:7px 10px; }
+  .action-row{ display:flex; flex-wrap:wrap; gap:8px; padding-top:4px; }
+  .action-row .btn{ flex:1; font-size:.74rem; min-width:140px; }
+  .rename-row{ display:flex; gap:8px; padding-top:6px; flex-wrap:wrap; }
+  .rename-row input{ flex:1; font-family:var(--sans); min-width:160px; }
+  .rename-row .btn{ flex:0 0 auto; }
+  .plaque{
+    background:var(--brass-soft); color:var(--brass); font-family:var(--mono);
+    font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; text-align:center;
+    padding:8px 0;
+  }
+
+  .rarity-common .plaque{ background:var(--surface-2); color:var(--muted); }
+  .rarity-rare{ box-shadow:0 0 0 1px var(--brass) inset; }
+  .rarity-epic{ border-color:var(--brass); }
+  .rarity-epic .plaque{ background:var(--brass-soft); }
+  .rarity-legendary{ border-color:transparent; }
+  .rarity-legendary::before{
+    content:""; position:absolute; inset:-2px; border-radius:18px; z-index:0;
+    background:linear-gradient(120deg,var(--brass),#fff3d1,var(--brass),#8a6d2f,var(--brass));
+    background-size:300% 300%; animation:shimmer 7s linear infinite;
+  }
+  .rarity-legendary > *{ position:relative; z-index:1; }
+  .rarity-legendary .nft-body, .rarity-legendary .nft-image{ background:var(--surface); }
+  @keyframes shimmer{ 0%{background-position:0% 50%} 100%{background-position:300% 50%} }
+  @media (prefers-reduced-motion:reduce){
+    .rarity-legendary::before{ animation:none; }
+    .nft-card.skeleton{ animation:none; }
+  }
+
+  .empty-msg{ color:var(--muted); font-size:.92rem; padding:24px 4px; }
+
+  /* ---------- explore ---------- */
+  .explore-row{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; }
+  .explore-row input{ flex:1; min-width:140px; }
+  @media (max-width:480px){
+    .explore-row{ flex-direction:column; align-items:stretch; }
+    .explore-row #exploreBtn{ width:100%; }
+  }
+  #exploreResult .nft-card{ max-width:320px; }
+
+  /* ---------- owner panel ---------- */
+  .owner-panel{
+    border:1px dashed var(--brass); border-radius:var(--radius); padding:20px; background:var(--surface);
+  }
+  .owner-panel .section-head .eyebrow{ color:var(--brass); }
+  .owner-form{ margin-bottom:22px; }
+  .owner-form h4{ font-size:.85rem; margin:0 0 10px; color:var(--parchment); }
+  .owner-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:10px; }
+  .owner-grid label{ display:block; font-size:.7rem; color:var(--muted); margin-bottom:4px; }
+  .owner-grid input{ width:100%; }
+
+  footer{ text-align:center; color:var(--muted); font-size:.78rem; padding-top:10px; }
+
+  /* ---------- toasts ---------- */
+  .toast-container{
+    position:fixed; bottom:18px; right:18px; display:flex; flex-direction:column; gap:8px;
+    z-index:999; max-width:320px;
+  }
+  @media (max-width:560px){
+    .toast-container{ left:12px; right:12px; bottom:12px; max-width:none; }
+  }
+  .toast{
+    background:var(--surface-3); border:1px solid var(--border); color:var(--parchment);
+    padding:11px 14px; border-radius:10px; font-size:.84rem; opacity:0; transform:translateY(8px);
+    transition:opacity .25s ease, transform .25s ease; box-shadow:0 6px 18px rgba(0,0,0,.35);
+  }
+  .toast.show{ opacity:1; transform:translateY(0); }
+  .toast-success{ border-color:var(--success); }
+  .toast-error{ border-color:var(--danger); }
+
+  @media (max-width:600px){
+    .field-row{ grid-template-columns:1fr; }
+    .field-row label{ margin-bottom:-4px; }
+    .field-row .btn{ width:100%; }
+  }
+</style>
+</head>
+<body class="wallet-disconnected">
+<div class="app" id="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <span class="quill">✒</span>
+      <div>
+        <h1>Kavi Picture NFT</h1>
+        <small>Burn LIKE + KAVI, get a creation</small>
+      </div>
+    </div>
+    <div class="top-right">
+      <span class="chip" id="networkChip">network: —</span>
+      <span class="chip" id="contractChip">
+        contract: <span id="contractAddrText">—</span>
+        <button class="copy-icon" data-copy="" id="contractCopyBtn" title="Copy address">⧉</button>
+      </span>
+      <button class="btn btn-primary" id="connectBtn">Connect Wallet</button>
+    </div>
+  </div>
+
+  <div id="bannerArea"></div>
+
+  <section>
+    <div class="section-head">
+      <div><span class="eyebrow">Ledger</span><h2>Your Tokens</h2></div>
+      <p class="hint">Approve here before minting or updating</p>
+    </div>
+    <div class="ledger-grid">
+      <div class="ledger-card like">
+        <h3>❤ LIKE Token</h3>
+        <div class="token-addr">
+          <span id="likeAddrText">—</span>
+          <button class="copy-icon" data-copy="" id="likeCopyBtn" title="Copy address">⧉</button>
+        </div>
+        <div class="ledger-stats">
+          <div><div class="label">Balance</div><div class="value" id="likeBalance">—</div></div>
+          <div><div class="label">Allowance</div><div class="value" id="likeAllowance">—</div></div>
+        </div>
+        <div class="approve-row">
+          <input type="text" id="likeApproveAmount" placeholder="Amount (e.g. 100)">
+          <button class="btn btn-like action-btn" id="likeApproveBtn">Approve</button>
+        </div>
+        <div class="quick-amounts">
+          <button type="button" class="chip-btn" data-fill="likeApproveAmount" data-amt="50">50</button>
+          <button type="button" class="chip-btn" data-fill="likeApproveAmount" data-amt="200">200</button>
+          <button type="button" class="chip-btn" data-fill="likeApproveAmount" data-amt="1000">1000</button>
+        </div>
+      </div>
+      <div class="ledger-card kavi">
+        <h3>✒ KAVI Token</h3>
+        <div class="token-addr">
+          <span id="kaviAddrText">—</span>
+          <button class="copy-icon" data-copy="" id="kaviCopyBtn" title="Copy address">⧉</button>
+        </div>
+        <div class="ledger-stats">
+          <div><div class="label">Balance</div><div class="value" id="kaviBalance">—</div></div>
+          <div><div class="label">Allowance</div><div class="value" id="kaviAllowance">—</div></div>
+        </div>
+        <div class="approve-row">
+          <input type="text" id="kaviApproveAmount" placeholder="Amount (e.g. 100)">
+          <button class="btn btn-kavi action-btn" id="kaviApproveBtn">Approve</button>
+        </div>
+        <div class="quick-amounts">
+          <button type="button" class="chip-btn" data-fill="kaviApproveAmount" data-amt="50">50</button>
+          <button type="button" class="chip-btn" data-fill="kaviApproveAmount" data-amt="200">200</button>
+          <button type="button" class="chip-btn" data-fill="kaviApproveAmount" data-amt="1000">1000</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div><span class="eyebrow">Mint</span><h2>Create a New Piece</h2></div>
+    </div>
+    <div class="mint-card">
+      <div class="mint-name">
+        <label for="mintNameInput">Give your creation a name</label>
+        <input type="text" id="mintNameInput" placeholder="e.g. First Monsoon">
+      </div>
+      <div class="mint-cost">Cost: <b id="mintCostText">—</b></div>
+      <button class="btn btn-primary action-btn" id="mintBtn">Mint</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div><span class="eyebrow">Gallery</span><h2>Your Creations</h2></div>
+      <button class="btn btn-ghost" id="refreshGalleryBtn">↻ Refresh</button>
+    </div>
+    <div class="gallery-grid" id="galleryGrid">
+      <p class="empty-msg">Connect your wallet to see your NFTs.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <div><span class="eyebrow">Explore</span><h2>View Any NFT</h2></div>
+    </div>
+    <div class="explore-row">
+      <input type="text" id="exploreIdInput" placeholder="Token ID, e.g. 1">
+      <button class="btn btn-ghost" id="exploreBtn">View</button>
+    </div>
+    <div id="exploreResult"></div>
+  </section>
+
+  <section id="ownerSection" class="owner-panel hidden">
+    <div class="section-head">
+      <div><span class="eyebrow">Owner Only</span><h2>Owner Console</h2></div>
+    </div>
+
+    <form class="owner-form" id="ownerMintCostForm">
+      <h4>Mint Costs</h4>
+      <div class="owner-grid">
+        <div><label>LIKE</label><input type="text" id="ownerMintLike" class="owner-input"></div>
+        <div><label>KAVI</label><input type="text" id="ownerMintKavi" class="owner-input"></div>
+      </div>
+      <button class="btn btn-brass action-btn" type="submit">Save Mint Costs</button>
+    </form>
+
+    <form class="owner-form" id="ownerUpdateCostForm">
+      <h4>Update Costs</h4>
+      <div class="owner-grid">
+        <div><label>Background (KAVI)</label><input type="text" id="ownerBgCost" class="owner-input"></div>
+        <div><label>Frame (LIKE)</label><input type="text" id="ownerFrameCost" class="owner-input"></div>
+        <div><label>Mood (KAVI)</label><input type="text" id="ownerMoodCost" class="owner-input"></div>
+        <div><label>Color (LIKE)</label><input type="text" id="ownerColorCost" class="owner-input"></div>
+        <div><label>Effect — LIKE half</label><input type="text" id="ownerEffectLikeCost" class="owner-input"></div>
+        <div><label>Effect — KAVI half</label><input type="text" id="ownerEffectKaviCost" class="owner-input"></div>
+        <div><label>Boost Like Power</label><input type="text" id="ownerBoostLikeCost" class="owner-input"></div>
+        <div><label>Boost Kavi Power</label><input type="text" id="ownerBoostKaviCost" class="owner-input"></div>
+        <div><label>Level Up — LIKE</label><input type="text" id="ownerLevelLikeCost" class="owner-input"></div>
+        <div><label>Level Up — KAVI</label><input type="text" id="ownerLevelKaviCost" class="owner-input"></div>
+      </div>
+      <button class="btn btn-brass action-btn" type="submit">Save Update Costs</button>
+    </form>
+
+    <form class="owner-form" id="ownerRescueForm">
+      <h4>Rescue Token (recover tokens sent here by mistake)</h4>
+      <div class="owner-grid">
+        <div><label>Token address</label><input type="text" id="rescueTokenAddr" placeholder="0x..."></div>
+        <div><label>To address</label><input type="text" id="rescueToAddr" placeholder="0x..."></div>
+        <div><label>Amount (raw, without decimals)</label><input type="text" id="rescueAmount" placeholder="e.g. 1000000000000000000"></div>
+      </div>
+      <button class="btn btn-danger action-btn" type="submit">Rescue</button>
+    </form>
+  </section>
+
+  <footer>Kavi Picture NFT · all data lives on-chain · LIKE/KAVI are burned right from this page.</footer>
+</div>
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+<script>
+/* ============== CONFIG ============== */
+const NFT_ADDRESS = "0x6C8eb01bb242DF4473e5757aC22a15657334753c";
+const NFT_ABI = [{"inputs":[{"internalType":"address","name":"likeTokenAddress","type":"address"},{"internalType":"address","name":"kaviTokenAddress","type":"address"},{"internalType":"address","name":"initialOwner","type":"address"}],"stateMutability":"nonpayable","type":"constructor"},{"inputs":[{"internalType":"address","name":"sender","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"address","name":"owner","type":"address"}],"name":"ERC721IncorrectOwner","type":"error"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ERC721InsufficientApproval","type":"error"},{"inputs":[{"internalType":"address","name":"approver","type":"address"}],"name":"ERC721InvalidApprover","type":"error"},{"inputs":[{"internalType":"address","name":"operator","type":"address"}],"name":"ERC721InvalidOperator","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"ERC721InvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"receiver","type":"address"}],"name":"ERC721InvalidReceiver","type":"error"},{"inputs":[{"internalType":"address","name":"sender","type":"address"}],"name":"ERC721InvalidSender","type":"error"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ERC721NonexistentToken","type":"error"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"OwnableInvalidOwner","type":"error"},{"inputs":[{"internalType":"address","name":"account","type":"address"}],"name":"OwnableUnauthorizedAccount","type":"error"},{"inputs":[],"name":"ReentrancyGuardReentrantCall","type":"error"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"approved","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"owner","type":"address"},{"indexed":true,"internalType":"address","name":"operator","type":"address"},{"indexed":false,"internalType":"bool","name":"approved","type":"bool"}],"name":"ApprovalForAll","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"string","name":"attribute","type":"string"},{"indexed":false,"internalType":"string","name":"newValue","type":"string"}],"name":"AttributeUpdated","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"uint256","name":"newLevel","type":"uint256"},{"indexed":false,"internalType":"enum PictureNFT.Rarity","name":"newRarity","type":"uint8"}],"name":"LeveledUp","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"user","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"},{"indexed":false,"internalType":"string","name":"name","type":"string"}],"name":"NFTMinted","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"previousOwner","type":"address"},{"indexed":true,"internalType":"address","name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},{"inputs":[],"name":"BURN_ADDRESS","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"approve","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"}],"name":"balanceOf","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"boostKaviPower","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"boostKaviPowerCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"boostLikePowerCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"boostLikesPower","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"string","name":"nftName","type":"string"}],"name":"depositAndMint","outputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getApproved","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"getAttributes","outputs":[{"components":[{"internalType":"string","name":"name","type":"string"},{"internalType":"enum PictureNFT.Background","name":"background","type":"uint8"},{"internalType":"enum PictureNFT.Frame","name":"frame","type":"uint8"},{"internalType":"enum PictureNFT.Mood","name":"mood","type":"uint8"},{"internalType":"enum PictureNFT.ColorTheme","name":"color","type":"uint8"},{"internalType":"enum PictureNFT.Effect","name":"effect","type":"uint8"},{"internalType":"uint256","name":"level","type":"uint256"},{"internalType":"uint256","name":"likesPower","type":"uint256"},{"internalType":"uint256","name":"kaviPower","type":"uint256"},{"internalType":"enum PictureNFT.Rarity","name":"rarity","type":"uint8"},{"internalType":"uint256","name":"lastUpdated","type":"uint256"}],"internalType":"struct PictureNFT.Attributes","name":"","type":"tuple"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"owner","type":"address"},{"internalType":"address","name":"operator","type":"address"}],"name":"isApprovedForAll","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"kaviToken","outputs":[{"internalType":"contract IKaviTokenBurnable","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"levelUp","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"levelUpKaviCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"levelUpLikeCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"likeToken","outputs":[{"internalType":"contract IERC20Minimal","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mintKaviCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"mintLikeCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"name","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"owner","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"string","name":"newName","type":"string"}],"name":"renameNFT","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"renounceOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"tokenAddress","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"amount","type":"uint256"}],"name":"rescueToken","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"bytes","name":"data","type":"bytes"}],"name":"safeTransferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"operator","type":"address"},{"internalType":"bool","name":"approved","type":"bool"}],"name":"setApprovalForAll","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"newLikeCost","type":"uint256"},{"internalType":"uint256","name":"newKaviCost","type":"uint256"}],"name":"setMintCosts","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"bgCost","type":"uint256"},{"internalType":"uint256","name":"frameCost","type":"uint256"},{"internalType":"uint256","name":"moodCost","type":"uint256"},{"internalType":"uint256","name":"colorCost","type":"uint256"},{"internalType":"uint256","name":"effectLikeCost","type":"uint256"},{"internalType":"uint256","name":"effectKaviCost","type":"uint256"},{"internalType":"uint256","name":"boostLikeCost","type":"uint256"},{"internalType":"uint256","name":"boostKaviCost","type":"uint256"},{"internalType":"uint256","name":"lvlLikeCost","type":"uint256"},{"internalType":"uint256","name":"lvlKaviCost","type":"uint256"}],"name":"setUpdateCosts","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"bytes4","name":"interfaceId","type":"bytes4"}],"name":"supportsInterface","outputs":[{"internalType":"bool","name":"","type":"bool"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"symbol","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"","type":"uint256"}],"name":"tokenAttributes","outputs":[{"internalType":"string","name":"name","type":"string"},{"internalType":"enum PictureNFT.Background","name":"background","type":"uint8"},{"internalType":"enum PictureNFT.Frame","name":"frame","type":"uint8"},{"internalType":"enum PictureNFT.Mood","name":"mood","type":"uint8"},{"internalType":"enum PictureNFT.ColorTheme","name":"color","type":"uint8"},{"internalType":"enum PictureNFT.Effect","name":"effect","type":"uint8"},{"internalType":"uint256","name":"level","type":"uint256"},{"internalType":"uint256","name":"likesPower","type":"uint256"},{"internalType":"uint256","name":"kaviPower","type":"uint256"},{"internalType":"enum PictureNFT.Rarity","name":"rarity","type":"uint8"},{"internalType":"uint256","name":"lastUpdated","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"tokenURI","outputs":[{"internalType":"string","name":"","type":"string"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"address","name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"enum PictureNFT.Background","name":"newBg","type":"uint8"}],"name":"updateBackground","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"updateBackgroundCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"enum PictureNFT.ColorTheme","name":"newColor","type":"uint8"}],"name":"updateColor","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"updateColorCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"enum PictureNFT.Effect","name":"newEffect","type":"uint8"}],"name":"updateEffect","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"updateEffectKaviCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[],"name":"updateEffectLikeCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"enum PictureNFT.Frame","name":"newFrame","type":"uint8"}],"name":"updateFrame","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"updateFrameCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"},{"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"},{"internalType":"enum PictureNFT.Mood","name":"newMood","type":"uint8"}],"name":"updateMood","outputs":[],"stateMutability":"nonpayable","type":"function"},{"inputs":[],"name":"updateMoodCost","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"view","type":"function"}];
+const ERC20_ABI = [
+  "function symbol() view returns (string)",
+  "function decimals() view returns (uint8)",
+  "function balanceOf(address) view returns (uint256)",
+  "function allowance(address,address) view returns (uint256)",
+  "function approve(address,uint256) returns (bool)"
+];
+
+const BG_NAMES = ["Sunset","Night","Day","Galaxy","Rainfall"];
+const FRAME_NAMES = ["Wood","Gold","Silver","Neon","Bronze"];
+const MOOD_NAMES = ["Happy","Sad","Romantic","Angry","Calm"];
+const COLOR_NAMES = ["Red","Blue","Green","Yellow","Purple"];
+const EFFECT_NAMES = ["None","Glow","Sparkle","Shadow","Rainbow"];
+const RARITY_NAMES = ["Common","Rare","Epic","Legendary"];
+
+const EXPLORERS = {
+  1:"https://etherscan.io", 5:"https://goerli.etherscan.io", 11155111:"https://sepolia.etherscan.io",
+  137:"https://polygonscan.com", 80001:"https://mumbai.polygonscan.com", 80002:"https://amoy.polygonscan.com",
+  56:"https://bscscan.com", 97:"https://testnet.bscscan.com",
+  42161:"https://arbiscan.io", 421614:"https://sepolia.arbiscan.io",
+  10:"https://optimistic.etherscan.io", 8453:"https://basescan.org", 84532:"https://sepolia.basescan.org"
+};
+
+/* ============== STATE ============== */
+const state = {
+  provider:null, signer:null, userAddress:null, chainId:null,
+  nftRead:null, nftWrite:null, ownerAddress:null, isOwner:false,
+  like:{ address:null, read:null, write:null, symbol:"LIKE", decimals:18, balance:null, allowance:null },
+  kavi:{ address:null, read:null, write:null, symbol:"KAVI", decimals:18, balance:null, allowance:null },
+  costs:{}, busy:false,
+};
+
+/* ============== UTIL ============== */
+function shortAddr(a){ return a ? a.slice(0,6)+"…"+a.slice(-4) : "—"; }
+function setText(id,t){ const el=document.getElementById(id); if(el) el.textContent=t; }
+function setVal(id,v){ const el=document.getElementById(id); if(el && el.dataset.touched!=="1") el.value=v; }
+function getVal(id){ const el=document.getElementById(id); return el ? el.value.trim() : ""; }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function formatUnits(bn, decimals){ try{ return ethers.utils.formatUnits(bn, decimals); }catch(e){ return "0"; } }
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function decodeBase64Json(uri){
+  const b64 = uri.split(",")[1];
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  const text = new TextDecoder("utf-8").decode(bytes);
+  return JSON.parse(text);
+}
+
+function toast(message, type="info", timeout=4500){
+  const container = document.getElementById("toastContainer");
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  el.textContent = message;
+  container.appendChild(el);
+  requestAnimationFrame(()=> el.classList.add("show"));
+  setTimeout(()=>{ el.classList.remove("show"); setTimeout(()=>el.remove(),300); }, timeout);
+}
+
+function parseError(e){
+  let msg = e?.reason || e?.error?.data?.message || e?.error?.message || e?.data?.message || e?.message || "Something went wrong.";
+  if (e?.code === 4001 || /user rejected/i.test(msg)) return "Transaction was cancelled.";
+  if (/insufficient allowance|ERC20InsufficientAllowance/i.test(msg)) return "Allowance is too low — approve and try again.";
+  if (/insufficient balance|ERC20InsufficientBalance/i.test(msg)) return "Insufficient balance for this action.";
+  msg = msg.replace("execution reverted: ","").replace(/\s*\(.*\)\s*$/,"").trim();
+  if (msg.length > 170) msg = msg.slice(0,170)+"…";
+  return msg;
+}
+
+function copyToClipboard(text){
+  if(!text) return;
+  navigator.clipboard.writeText(text)
+    .then(()=> toast("Copied ✓","success",1500))
+    .catch(()=> toast("Could not copy","error"));
+}
+
+function setBanner(type, msg){
+  document.getElementById("bannerArea").innerHTML = `<div class="banner">${escapeHtml(msg)}</div>`;
+}
+function clearBanner(){ document.getElementById("bannerArea").innerHTML = ""; }
+
+async function withBusy(fn){
+  if(state.busy) return;
+  state.busy = true;
+  document.body.classList.add("busy");
+  try{ await fn(); }
+  catch(e){ console.error(e); toast(parseError(e),"error"); }
+  finally{ state.busy=false; document.body.classList.remove("busy"); }
+}
+
+function requireConnected(){
+  if(!state.userAddress){ toast("Connect your wallet first","error"); return false; }
+  return true;
+}
+
+/* ============== INIT ============== */
+window.addEventListener("DOMContentLoaded", init);
+
+async function init(){
+  setText("contractAddrText", shortAddr(NFT_ADDRESS));
+  document.getElementById("contractCopyBtn").dataset.copy = NFT_ADDRESS;
+
+  if(!window.ethereum){
+    document.getElementById("app").innerHTML = `
+      <div class="empty-msg" style="text-align:center;padding:60px 10px;">
+        No wallet found in this browser.<br>
+        <a href="https://metamask.io" target="_blank" rel="noopener">Install MetaMask →</a> or open this page in a wallet-enabled browser.
+      </div>`;
+    return;
+  }
+
+  state.provider = new ethers.providers.Web3Provider(window.ethereum, "any");
+  state.nftRead = new ethers.Contract(NFT_ADDRESS, NFT_ABI, state.provider);
+
+  const network = await state.provider.getNetwork();
+  state.chainId = network.chainId;
+  setText("networkChip", `network: ${network.name!=="unknown" ? network.name : "chainId "+network.chainId}`);
+
+  const hasCode = await checkContractCode();
+  wireStaticHandlers();
+  if(hasCode) await loadPublicData();
+
+  window.ethereum.on("accountsChanged", handleAccountsChanged);
+  window.ethereum.on("chainChanged", ()=> window.location.reload());
+
+  try{
+    const accs = await window.ethereum.request({ method:"eth_accounts" });
+    if(accs && accs.length) await onAccountsReady(accs);
+  }catch(e){ console.error(e); }
+}
+
+async function checkContractCode(){
+  try{
+    const code = await state.provider.getCode(NFT_ADDRESS);
+    if(code === "0x"){
+      setBanner("error","No contract code found at this address on the connected network. Select the correct network in MetaMask.");
+      return false;
+    }
+    clearBanner();
+    return true;
+  }catch(e){
+    setBanner("error","Could not connect to the network: "+parseError(e));
+    return false;
+  }
+}
+
+async function loadPublicData(){
+  try{
+    const [likeAddr, kaviAddr, ownerAddr] = await Promise.all([
+      state.nftRead.likeToken(), state.nftRead.kaviToken(), state.nftRead.owner()
+    ]);
+    state.like.address = likeAddr;
+    state.kavi.address = kaviAddr;
+    state.ownerAddress = ownerAddr;
+
+    state.like.read = new ethers.Contract(likeAddr, ERC20_ABI, state.provider);
+    state.kavi.read = new ethers.Contract(kaviAddr, ERC20_ABI, state.provider);
+
+    setText("likeAddrText", shortAddr(likeAddr));
+    document.getElementById("likeCopyBtn").dataset.copy = likeAddr;
+    setText("kaviAddrText", shortAddr(kaviAddr));
+    document.getElementById("kaviCopyBtn").dataset.copy = kaviAddr;
+
+    const [lSym,lDec,kSym,kDec] = await Promise.all([
+      state.like.read.symbol().catch(()=>"LIKE"),
+      state.like.read.decimals().catch(()=>18),
+      state.kavi.read.symbol().catch(()=>"KAVI"),
+      state.kavi.read.decimals().catch(()=>18),
+    ]);
+    state.like.symbol=lSym; state.like.decimals=lDec;
+    state.kavi.symbol=kSym; state.kavi.decimals=kDec;
+
+    await loadCosts();
+  }catch(e){
+    console.error(e);
+    setBanner("error","Error loading data from the contract: "+parseError(e));
+  }
+}
+
+async function loadCosts(){
+  const c = state.nftRead;
+  const keys = ["mintLikeCost","mintKaviCost","updateBackgroundCost","updateFrameCost","updateMoodCost",
+    "updateColorCost","updateEffectLikeCost","updateEffectKaviCost","boostLikePowerCost","boostKaviPowerCost",
+    "levelUpLikeCost","levelUpKaviCost"];
+  const vals = await Promise.all(keys.map(k=>c[k]()));
+  keys.forEach((k,i)=> state.costs[k]=vals[i]);
+  renderMintPanel();
+  renderOwnerCostForm();
+}
+
+/* ============== WALLET ============== */
+async function connectWallet(){
+  try{
+    const accounts = await state.provider.send("eth_requestAccounts", []);
+    await onAccountsReady(accounts);
+  }catch(e){ toast(parseError(e),"error"); }
+}
+
+async function onAccountsReady(accounts){
+  if(!accounts || !accounts.length) return;
+  state.userAddress = accounts[0];
+  state.signer = state.provider.getSigner();
+  state.nftWrite = state.nftRead.connect(state.signer);
+  if(state.like.read) state.like.write = state.like.read.connect(state.signer);
+  if(state.kavi.read) state.kavi.write = state.kavi.read.connect(state.signer);
+  state.isOwner = !!state.ownerAddress && state.userAddress.toLowerCase() === state.ownerAddress.toLowerCase();
+
+  document.body.classList.remove("wallet-disconnected");
+  const btn = document.getElementById("connectBtn");
+  btn.textContent = shortAddr(state.userAddress);
+  btn.classList.remove("btn-primary"); btn.classList.add("btn-ghost");
+
+  renderOwnerSection();
+  await refreshAll();
+}
+
+async function handleAccountsChanged(accounts){
+  if(!accounts || accounts.length===0){
+    state.userAddress=null; state.signer=null; state.nftWrite=null;
+    document.body.classList.add("wallet-disconnected");
+    const btn = document.getElementById("connectBtn");
+    btn.textContent="Connect Wallet"; btn.classList.add("btn-primary"); btn.classList.remove("btn-ghost");
+    renderGalleryEmpty("connect");
+    document.getElementById("ownerSection").classList.add("hidden");
+  }else{
+    await onAccountsReady(accounts);
+  }
+}
+
+async function refreshAll(){
+  await Promise.all([refreshLedger(), refreshGallery()]);
+}
+
+async function refreshLedger(){
+  if(!state.userAddress || !state.like.read || !state.kavi.read) return;
+  try{
+    const [lb,la,kb,ka] = await Promise.all([
+      state.like.read.balanceOf(state.userAddress),
+      state.like.read.allowance(state.userAddress, NFT_ADDRESS),
+      state.kavi.read.balanceOf(state.userAddress),
+      state.kavi.read.allowance(state.userAddress, NFT_ADDRESS),
+    ]);
+    state.like.balance=lb; state.like.allowance=la;
+    state.kavi.balance=kb; state.kavi.allowance=ka;
+    renderLedger();
+  }catch(e){ console.error(e); }
+}
+
+function renderLedger(){
+  setText("likeBalance", formatUnits(state.like.balance, state.like.decimals)+" "+state.like.symbol);
+  setText("likeAllowance", formatUnits(state.like.allowance, state.like.decimals)+" "+state.like.symbol);
+  setText("kaviBalance", formatUnits(state.kavi.balance, state.kavi.decimals)+" "+state.kavi.symbol);
+  setText("kaviAllowance", formatUnits(state.kavi.allowance, state.kavi.decimals)+" "+state.kavi.symbol);
+}
+
+function renderMintPanel(){
+  if(!state.costs.mintLikeCost) return;
+  setText("mintCostText",
+    formatUnits(state.costs.mintLikeCost, state.like.decimals)+" "+state.like.symbol+
+    " + "+formatUnits(state.costs.mintKaviCost, state.kavi.decimals)+" "+state.kavi.symbol);
+}
+
+/* ============== APPROVE ============== */
+async function handleApprove(tokenKey){
+  if(!requireConnected()) return;
+  const tok = state[tokenKey];
+  const raw = getVal(tokenKey+"ApproveAmount");
+  let amount;
+  try{ amount = ethers.utils.parseUnits(raw || "0", tok.decimals); }
+  catch(e){ toast("Enter a valid amount","error"); return; }
+  if(amount.lte(0)){ toast("Amount must be greater than 0","error"); return; }
+
+  await withBusy(async ()=>{
+    toast(`Approving ${tok.symbol}...`);
+    const tx = await tok.write.approve(NFT_ADDRESS, amount);
+    toast("Waiting for confirmation...");
+    await tx.wait();
+    toast(`${tok.symbol} approved ✓`,"success");
+    await refreshLedger();
+  });
+}
+
+async function ensureAllowance(tokenKey, requiredAmount){
+  const tok = state[tokenKey];
+  const current = await tok.read.allowance(state.userAddress, NFT_ADDRESS);
+  if(current.gte(requiredAmount)) return;
+  toast(`Requesting ${tok.symbol} approval...`);
+  const approveAmt = requiredAmount.mul(25);
+  const tx = await tok.write.approve(NFT_ADDRESS, approveAmt);
+  await tx.wait();
+  toast(`${tok.symbol} approved ✓`,"success");
+}
+
+/* ============== MINT ============== */
+async function handleMint(){
+  if(!requireConnected()) return;
+  const nameInput = document.getElementById("mintNameInput");
+  const name = nameInput.value.trim();
+  if(!name){ toast("Give your NFT a name","error"); return; }
+
+  await withBusy(async ()=>{
+    await ensureAllowance("like", state.costs.mintLikeCost);
+    await ensureAllowance("kavi", state.costs.mintKaviCost);
+    toast("Sending mint transaction...");
+    const tx = await state.nftWrite.depositAndMint(name);
+    const receipt = await tx.wait();
+    let newId = null;
+    for(const log of receipt.logs){
+      try{
+        const parsed = state.nftWrite.interface.parseLog(log);
+        if(parsed.name==="NFTMinted") newId = parsed.args.tokenId.toString();
+      }catch(e){}
+    }
+    toast(newId ? `NFT #${newId} minted! 🎉` : "NFT minted! 🎉","success");
+    nameInput.value="";
+    await refreshLedger();
+    await refreshGallery();
+    if(newId) setTimeout(()=>flashCard(newId), 200);
+  });
+}
+
+function flashCard(tokenId){
+  const card = document.querySelector(`.nft-card[data-token-id="${tokenId}"]`);
+  if(card){ card.classList.add("flash"); card.scrollIntoView({behavior:"smooth", block:"center"}); setTimeout(()=>card.classList.remove("flash"), 2500); }
+}
+
+function toggleDrawer(toggleBtn){
+  const drawer = toggleBtn.closest(".update-drawer");
+  if(!drawer) return;
+  const isOpen = drawer.classList.toggle("open");
+  toggleBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+}
+
+/* ============== GALLERY ============== */
+function renderSkeletonCards(n){
+  return Array.from({length:n}).map(()=>`<div class="nft-card skeleton"></div>`).join("");
+}
+
+function renderGalleryEmpty(kind){
+  const grid = document.getElementById("galleryGrid");
+  const msgs = {
+    connect:"Connect your wallet to see your NFTs.",
+    none:'No NFTs minted yet. Use the "Mint" panel above to create your first piece ✒',
+    error:'Something went wrong loading the gallery. Try "Refresh", or check your Token ID in the "Explore" box below.',
+  };
+  grid.innerHTML = `<p class="empty-msg">${msgs[kind]||msgs.error}</p>`;
+}
+
+async function tokenExists(id){
+  if(id < 1) return true;
+  for(let attempt=0; attempt<2; attempt++){
+    try{ await state.nftRead.ownerOf(id); return true; }
+    catch(e){ if(attempt===1) return false; }
+  }
+  return false;
+}
+
+async function findMaxTokenId(){
+  let lo = 0, hi = 1;
+  while(await tokenExists(hi)){
+    lo = hi;
+    hi = hi * 2;
+    if(hi > 1000000) break;
+  }
+  while(hi - lo > 1){
+    const mid = Math.floor((lo + hi) / 2);
+    if(await tokenExists(mid)) lo = mid; else hi = mid;
+  }
+  return lo;
+}
+
+async function refreshGallery(){
+  if(!state.userAddress){ renderGalleryEmpty("connect"); return; }
+  const grid = document.getElementById("galleryGrid");
+  grid.innerHTML = renderSkeletonCards(3);
+  try{
+    const maxId = await findMaxTokenId();
+    const owned = [];
+    const BATCH = 25;
+    for(let start=1; start<=maxId; start+=BATCH){
+      const end = Math.min(start + BATCH - 1, maxId);
+      const batchIds = [];
+      for(let id=start; id<=end; id++) batchIds.push(id);
+      await Promise.all(batchIds.map(async id=>{
+        try{
+          const o = await state.nftRead.ownerOf(id);
+          if(o.toLowerCase()===state.userAddress.toLowerCase()) owned.push(String(id));
+        }catch(e){}
+      }));
+    }
+    owned.sort((a,b)=>Number(a)-Number(b));
+    if(owned.length===0){ renderGalleryEmpty("none"); return; }
+    const cardsHtml = await Promise.all(owned.map(id=>buildCardHtml(id,false,false)));
+    grid.innerHTML = cardsHtml.join("");
+  }catch(e){
+    console.error(e);
+    renderGalleryEmpty("error");
+  }
+}
+
+function selectRow(tokenId, key, label, names, currentIndex, costText, btnVariant, action){
+  const options = names.map((n,i)=>`<option value="${i}" ${i===currentIndex?"selected":""}>${n}</option>`).join("");
+  return `
+  <div class="field-row">
+    <label>${label}</label>
+    <span class="select-wrap">
+      <select class="select-input" data-field="${key}" data-token-id="${tokenId}">${options}</select>
+      <span class="select-arrow" aria-hidden="true">▾</span>
+    </span>
+    <button class="btn btn-${btnVariant} action-btn" data-action="${action}" data-token-id="${tokenId}">Update · ${costText}</button>
+  </div>`;
+}
+
+async function buildCardHtml(tokenId, keepOpen, readonly){
+  const [attrs, uri] = await Promise.all([
+    state.nftRead.getAttributes(tokenId),
+    state.nftRead.tokenURI(tokenId),
+  ]);
+  const json = decodeBase64Json(uri);
+  const rarityClass = "rarity-" + RARITY_NAMES[attrs.rarity].toLowerCase();
+  const name = escapeHtml(json.name);
+
+  let drawer = "";
+  if(readonly){
+    let ownerAddr = "—";
+    try{ ownerAddr = await state.nftRead.ownerOf(tokenId); }catch(e){}
+    drawer = `<div class="owner-line">Owner: ${shortAddr(ownerAddr)} <button class="copy-icon" data-copy="${ownerAddr}" title="Copy">⧉</button></div>`;
+  } else {
+    const likeSym = state.like.symbol, kaviSym = state.kavi.symbol;
+    const bgCost = formatUnits(state.costs.updateBackgroundCost, state.kavi.decimals)+" "+kaviSym;
+    const frameCost = formatUnits(state.costs.updateFrameCost, state.like.decimals)+" "+likeSym;
+    const moodCost = formatUnits(state.costs.updateMoodCost, state.kavi.decimals)+" "+kaviSym;
+    const colorCost = formatUnits(state.costs.updateColorCost, state.like.decimals)+" "+likeSym;
+    const effectCost = formatUnits(state.costs.updateEffectLikeCost, state.like.decimals)+" "+likeSym+" + "+formatUnits(state.costs.updateEffectKaviCost, state.kavi.decimals)+" "+kaviSym;
+    const boostLikeCost = formatUnits(state.costs.boostLikePowerCost, state.like.decimals)+" "+likeSym;
+    const boostKaviCost = formatUnits(state.costs.boostKaviPowerCost, state.kavi.decimals)+" "+kaviSym;
+    const levelCost = formatUnits(state.costs.levelUpLikeCost, state.like.decimals)+" "+likeSym+" + "+formatUnits(state.costs.levelUpKaviCost, state.kavi.decimals)+" "+kaviSym;
+
+    drawer = `
+    <div class="update-drawer${keepOpen?" open":""}">
+      <button type="button" class="drawer-toggle" aria-expanded="${keepOpen?"true":"false"}">Update</button>
+      <div class="update-grid">
+        ${selectRow(tokenId,"background","Bg",BG_NAMES,attrs.background,bgCost,"kavi","updateBackground")}
+        ${selectRow(tokenId,"frame","Frame",FRAME_NAMES,attrs.frame,frameCost,"like","updateFrame")}
+        ${selectRow(tokenId,"mood","Mood",MOOD_NAMES,attrs.mood,moodCost,"kavi","updateMood")}
+        ${selectRow(tokenId,"color","Color",COLOR_NAMES,attrs.color,colorCost,"like","updateColor")}
+        ${selectRow(tokenId,"effect","Effect",EFFECT_NAMES,attrs.effect,effectCost,"brass","updateEffect")}
+        <div class="action-row">
+          <button class="btn btn-like action-btn" data-action="boostLikesPower" data-token-id="${tokenId}">❤ Boost · ${boostLikeCost}</button>
+          <button class="btn btn-kavi action-btn" data-action="boostKaviPower" data-token-id="${tokenId}">✒ Boost · ${boostKaviCost}</button>
+        </div>
+        <div class="action-row">
+          <button class="btn btn-brass action-btn" data-action="levelUp" data-token-id="${tokenId}">⬆ Level Up · ${levelCost}</button>
+        </div>
+        <div class="rename-row">
+          <input type="text" class="rename-input" data-token-id="${tokenId}" value="${name}">
+          <button class="btn btn-ghost action-btn" data-action="rename" data-token-id="${tokenId}">Save Name (free)</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  return `
+  <article class="nft-card ${rarityClass}" data-token-id="${tokenId}">
+    <div class="nft-image"><img src="${json.image}" alt="${name}" loading="lazy"></div>
+    <div class="nft-body">
+      <h3 class="nft-title"><span>${name}</span><span class="nft-id">#${tokenId}</span></h3>
+      <div class="chip-row">
+        <span class="chip">${BG_NAMES[attrs.background]}</span>
+        <span class="chip">${FRAME_NAMES[attrs.frame]}</span>
+        <span class="chip">${MOOD_NAMES[attrs.mood]}</span>
+        <span class="chip">${COLOR_NAMES[attrs.color]}</span>
+        <span class="chip">${EFFECT_NAMES[attrs.effect]}</span>
+      </div>
+      <div class="power-row"><span>❤ ${attrs.likesPower.toString()}</span><span>✒ ${attrs.kaviPower.toString()}</span></div>
+      ${drawer}
+    </div>
+    <div class="plaque">Lvl ${attrs.level.toString()} · ${RARITY_NAMES[attrs.rarity]}</div>
+  </article>`;
+}
+
+async function refreshSingleCard(tokenId){
+  const old = document.querySelector(`.nft-card[data-token-id="${tokenId}"]`);
+  const wasOpen = old ? !!old.querySelector(".update-drawer")?.classList.contains("open") : false;
+  const isInExplore = old ? !!old.closest("#exploreResult") : false;
+  const html = await buildCardHtml(tokenId, wasOpen, isInExplore);
+  if(old){
+    const temp = document.createElement("div");
+    temp.innerHTML = html;
+    old.replaceWith(temp.firstElementChild);
+  }
+}
+
+async function handleCardAction(tokenId, action, btn){
+  if(!requireConnected()) return;
+  const card = btn.closest(".nft-card");
+  await withBusy(async ()=>{
+    switch(action){
+      case "updateBackground": {
+        const val = Number(card.querySelector('[data-field="background"]').value);
+        await ensureAllowance("kavi", state.costs.updateBackgroundCost);
+        toast("Updating background...");
+        await (await state.nftWrite.updateBackground(tokenId, val)).wait();
+        break;
+      }
+      case "updateFrame": {
+        const val = Number(card.querySelector('[data-field="frame"]').value);
+        await ensureAllowance("like", state.costs.updateFrameCost);
+        toast("Updating frame...");
+        await (await state.nftWrite.updateFrame(tokenId, val)).wait();
+        break;
+      }
+      case "updateMood": {
+        const val = Number(card.querySelector('[data-field="mood"]').value);
+        await ensureAllowance("kavi", state.costs.updateMoodCost);
+        toast("Updating mood...");
+        await (await state.nftWrite.updateMood(tokenId, val)).wait();
+        break;
+      }
+      case "updateColor": {
+        const val = Number(card.querySelector('[data-field="color"]').value);
+        await ensureAllowance("like", state.costs.updateColorCost);
+        toast("Updating color...");
+        await (await state.nftWrite.updateColor(tokenId, val)).wait();
+        break;
+      }
+      case "updateEffect": {
+        const val = Number(card.querySelector('[data-field="effect"]').value);
+        await ensureAllowance("like", state.costs.updateEffectLikeCost);
+        await ensureAllowance("kavi", state.costs.updateEffectKaviCost);
+        toast("Updating effect...");
+        await (await state.nftWrite.updateEffect(tokenId, val)).wait();
+        break;
+      }
+      case "boostLikesPower": {
+        await ensureAllowance("like", state.costs.boostLikePowerCost);
+        toast("Boosting Likes Power...");
+        await (await state.nftWrite.boostLikesPower(tokenId)).wait();
+        break;
+      }
+      case "boostKaviPower": {
+        await ensureAllowance("kavi", state.costs.boostKaviPowerCost);
+        toast("Boosting Kavi Power...");
+        await (await state.nftWrite.boostKaviPower(tokenId)).wait();
+        break;
+      }
+      case "levelUp": {
+        await ensureAllowance("like", state.costs.levelUpLikeCost);
+        await ensureAllowance("kavi", state.costs.levelUpKaviCost);
+        toast("Leveling up...");
+        await (await state.nftWrite.levelUp(tokenId)).wait();
+        break;
+      }
+      case "rename": {
+        const input = card.querySelector(".rename-input");
+        const newName = input.value.trim();
+        if(!newName){ toast("Name can't be empty","error"); return; }
+        toast("Saving name...");
+        await (await state.nftWrite.renameNFT(tokenId, newName)).wait();
+        break;
+      }
+      default: return;
+    }
+    toast("Updated ✓","success");
+    await refreshLedger();
+    await refreshSingleCard(tokenId);
+  });
+}
+
+/* ============== EXPLORE ============== */
+async function handleExplore(){
+  const id = getVal("exploreIdInput");
+  if(!id){ toast("Enter a Token ID","error"); return; }
+  const out = document.getElementById("exploreResult");
+  out.innerHTML = renderSkeletonCards(1);
+  try{
+    await state.nftRead.ownerOf(id);
+    const html = await buildCardHtml(id, false, true);
+    out.innerHTML = html;
+  }catch(e){
+    out.innerHTML = `<p class="empty-msg">NFT #${escapeHtml(id)} not found — check that the ID is correct and has been minted.</p>`;
+  }
+}
+
+/* ============== OWNER ============== */
+function renderOwnerSection(){
+  const sec = document.getElementById("ownerSection");
+  if(!state.isOwner){ sec.classList.add("hidden"); return; }
+  sec.classList.remove("hidden");
+  renderOwnerCostForm();
+}
+
+function renderOwnerCostForm(){
+  if(!state.isOwner || !state.costs.mintLikeCost) return;
+  setVal("ownerMintLike", formatUnits(state.costs.mintLikeCost, state.like.decimals));
+  setVal("ownerMintKavi", formatUnits(state.costs.mintKaviCost, state.kavi.decimals));
+  setVal("ownerBgCost", formatUnits(state.costs.updateBackgroundCost, state.kavi.decimals));
+  setVal("ownerFrameCost", formatUnits(state.costs.updateFrameCost, state.like.decimals));
+  setVal("ownerMoodCost", formatUnits(state.costs.updateMoodCost, state.kavi.decimals));
+  setVal("ownerColorCost", formatUnits(state.costs.updateColorCost, state.like.decimals));
+  setVal("ownerEffectLikeCost", formatUnits(state.costs.updateEffectLikeCost, state.like.decimals));
+  setVal("ownerEffectKaviCost", formatUnits(state.costs.updateEffectKaviCost, state.kavi.decimals));
+  setVal("ownerBoostLikeCost", formatUnits(state.costs.boostLikePowerCost, state.like.decimals));
+  setVal("ownerBoostKaviCost", formatUnits(state.costs.boostKaviPowerCost, state.kavi.decimals));
+  setVal("ownerLevelLikeCost", formatUnits(state.costs.levelUpLikeCost, state.like.decimals));
+  setVal("ownerLevelKaviCost", formatUnits(state.costs.levelUpKaviCost, state.kavi.decimals));
+}
+
+async function handleOwnerMintCostSubmit(e){
+  e.preventDefault();
+  await withBusy(async ()=>{
+    const likeAmt = ethers.utils.parseUnits(getVal("ownerMintLike")||"0", state.like.decimals);
+    const kaviAmt = ethers.utils.parseUnits(getVal("ownerMintKavi")||"0", state.kavi.decimals);
+    toast("Updating mint costs...");
+    await (await state.nftWrite.setMintCosts(likeAmt, kaviAmt)).wait();
+    toast("Mint costs updated ✓","success");
+    document.querySelectorAll("#ownerMintCostForm .owner-input").forEach(i=>delete i.dataset.touched);
+    await loadCosts();
+  });
+}
+
+async function handleOwnerUpdateCostSubmit(e){
+  e.preventDefault();
+  await withBusy(async ()=>{
+    const args = [
+      ethers.utils.parseUnits(getVal("ownerBgCost")||"0", state.kavi.decimals),
+      ethers.utils.parseUnits(getVal("ownerFrameCost")||"0", state.like.decimals),
+      ethers.utils.parseUnits(getVal("ownerMoodCost")||"0", state.kavi.decimals),
+      ethers.utils.parseUnits(getVal("ownerColorCost")||"0", state.like.decimals),
+      ethers.utils.parseUnits(getVal("ownerEffectLikeCost")||"0", state.like.decimals),
+      ethers.utils.parseUnits(getVal("ownerEffectKaviCost")||"0", state.kavi.decimals),
+      ethers.utils.parseUnits(getVal("ownerBoostLikeCost")||"0", state.like.decimals),
+      ethers.utils.parseUnits(getVal("ownerBoostKaviCost")||"0", state.kavi.decimals),
+      ethers.utils.parseUnits(getVal("ownerLevelLikeCost")||"0", state.like.decimals),
+      ethers.utils.parseUnits(getVal("ownerLevelKaviCost")||"0", state.kavi.decimals),
+    ];
+    toast("Updating costs...");
+    await (await state.nftWrite.setUpdateCosts(...args)).wait();
+    toast("Update costs saved ✓","success");
+    document.querySelectorAll("#ownerUpdateCostForm .owner-input").forEach(i=>delete i.dataset.touched);
+    await loadCosts();
+  });
+}
+
+async function handleOwnerRescueSubmit(e){
+  e.preventDefault();
+  await withBusy(async ()=>{
+    const tokenAddr = getVal("rescueTokenAddr");
+    const toAddr = getVal("rescueToAddr");
+    const amountRaw = getVal("rescueAmount");
+    if(!ethers.utils.isAddress(tokenAddr) || !ethers.utils.isAddress(toAddr)){
+      toast("Enter a valid address","error"); return;
+    }
+    toast("Sending rescue transaction...");
+    await (await state.nftWrite.rescueToken(tokenAddr, toAddr, amountRaw)).wait();
+    toast("Rescue complete ✓","success");
+  });
+}
+
+/* ============== WIRE HANDLERS ============== */
+function wireStaticHandlers(){
+  document.getElementById("connectBtn").addEventListener("click", connectWallet);
+  document.getElementById("likeApproveBtn").addEventListener("click", ()=>handleApprove("like"));
+  document.getElementById("kaviApproveBtn").addEventListener("click", ()=>handleApprove("kavi"));
+  document.getElementById("mintBtn").addEventListener("click", handleMint);
+  document.getElementById("exploreBtn").addEventListener("click", handleExplore);
+  document.getElementById("refreshGalleryBtn").addEventListener("click", refreshGallery);
+
+  document.getElementById("galleryGrid").addEventListener("click", (e)=>{
+    const toggle = e.target.closest(".drawer-toggle");
+    if(toggle){ toggleDrawer(toggle); return; }
+    const btn = e.target.closest(".action-btn");
+    if(btn) handleCardAction(btn.dataset.tokenId, btn.dataset.action, btn);
+  });
+  document.getElementById("exploreResult").addEventListener("click", (e)=>{
+    const toggle = e.target.closest(".drawer-toggle");
+    if(toggle){ toggleDrawer(toggle); return; }
+    const btn = e.target.closest(".action-btn");
+    if(btn) handleCardAction(btn.dataset.tokenId, btn.dataset.action, btn);
+  });
+
+  document.getElementById("ownerMintCostForm").addEventListener("submit", handleOwnerMintCostSubmit);
+  document.getElementById("ownerUpdateCostForm").addEventListener("submit", handleOwnerUpdateCostSubmit);
+  document.getElementById("ownerRescueForm").addEventListener("submit", handleOwnerRescueSubmit);
+
+  document.addEventListener("click", (e)=>{
+    const c = e.target.closest("[data-copy]");
+    if(c && c.dataset.copy) copyToClipboard(c.dataset.copy);
+    const q = e.target.closest("[data-fill]");
+    if(q){ const el=document.getElementById(q.dataset.fill); if(el) el.value=q.dataset.amt; }
+  });
+  document.addEventListener("input", (e)=>{
+    if(e.target.matches(".owner-input")) e.target.dataset.touched="1";
+  });
+}
+</script>
+</body>
+</html>
